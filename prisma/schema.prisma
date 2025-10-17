@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Watch {
+  id              String      @id @default(cuid())
+  name            String
+  brand           String
+  modelNumber     String      @unique
+  description     String
+  images          String[]
+  inStock         Int         @default(10)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  category        String
+  price           Float
+  discountedPrice Float
+  orderItems      OrderItem[]
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  customerName      String
+  customerEmail     String
+  totalAmount       Float
+  status            String      @default("PENDING")
+  shippingAddress   String
+  razorpayOrderId   String?     @unique
+  razorpayPaymentId String?     @unique
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  orderItems        OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  watchId   String
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id])
+  watch     Watch    @relation(fields: [watchId], references: [id])
+
+  @@unique([orderId, watchId])
+}

@@ -1,0 +1,84 @@
+import prisma from "@/lib/prisma";
+import Image from "next/image";
+import Link from "next/link";
+
+export default async function ProductPage({ params }) {
+  const { id } = await params;
+
+  const product = await prisma.watch.findUnique({ where: { id } });
+
+  if (!product) {
+    return (
+      <div className="p-10 text-center text-red-600 font-semibold">
+        Product not found.
+      </div>
+    );
+  }
+
+  return (
+    <section className="p-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+      <div>
+        {product.images?.length ? (
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            width={600}
+            height={600}
+            className="rounded-xl object-cover w-full h-auto"
+          />
+        ) : (
+          <div className="bg-gray-200 w-full h-[400px] flex items-center justify-center text-gray-500 rounded-xl">
+            No Image
+          </div>
+        )}
+        {product.images?.length > 1 && (
+          <div className="flex gap-3 mt-3">
+            {product.images.slice(1).map((img, idx) => (
+              <Image
+                key={idx}
+                src={img}
+                alt={`${product.name}-${idx}`}
+                width={100}
+                height={100}
+                className="rounded-md object-cover cursor-pointer hover:opacity-80"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h1 className="text-3xl font-bold mb-3">{product.name}</h1>
+        <p className="text-gray-500 text-lg mb-2">{product.brand}</p>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-2xl font-semibold text-blue-600">
+            ₹{product.discountedPrice || product.price}
+          </span>
+          {product.discountedPrice && (
+            <span className="text-gray-400 line-through text-lg">
+              ₹{product.price}
+            </span>
+          )}
+        </div>
+        <p className="text-gray-700 mb-6 leading-relaxed">{product.description}</p>
+
+        <div className="flex items-center gap-4">
+          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+            Add to Cart
+          </button>
+
+          <Link
+            href={`/checkout?productId=${product.id}`}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+          >
+            Buy Now
+          </Link>
+        </div>
+
+        <p className="mt-4 text-sm text-gray-500">
+          In Stock: {product.inStock > 0 ? product.inStock : "Out of stock"}
+        </p>
+      </div>
+    </section>
+  );
+}

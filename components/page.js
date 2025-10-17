@@ -1,33 +1,20 @@
-// /ecommerce/app/page.jsx (Renamed from Home.jsx)
-
-// 1. Next.js does not use react-router-dom Link, it uses next/link
+"use client"
 import Link from "next/link";
-// 2. We will import the client-side components from the /components folder
-import WatchCard from "./ProductGrid";
-import FilterSidebar from "./FilterSidebar";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import TestimonialSection from "./TestimonialSection";
-import WhyChooseUs from "./WhyChooseUs";
-import StorySection from "./StorySection";
-import FloatingFilterButton from "../components/FloatingFilterButton"; // New client component for mobile filter
+import WatchCard from "@/components/ProductGrid";
+import FilterSidebar from "@/components/FilterSidebar"; 
+import Navbar from "@/components/Navbar"; 
+import Footer from "@/components/Footer";
+import TestimonialSection from "@/components/TestimonialSection";
+import WhyChooseUs from "@/components/WhyChooseUs";
+import StorySection from "@/components/StorySection";
+import HeroSlideshow from "@/components/HeroSlideshow"; 
+import FloatingFilterButton from "@/components/FloatingFilterButton";
 
-// 3. Lucide-react icons are fine
+// 3. Lucide-react icons are fine (used in client/server components)
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
 // 4. Server-side data fetching utility
 import { getPopularWatches } from "../lib/watchService";
-
-// 5. Images (still imported from /assets or referenced from /public)
-import Fastracklogo from '../assets/Fastrack_logo.svg.png';
-import Sonatalogo from '../assets/sonata_logo.jpg';
-import Titanlogo from '../assets/titan.png';
-import Timexlogo from '../assets/timex.png';
-import Fossillogo from '../assets/Fossil-Logo.png';
-import Policelogo from '../assets/Police-logo.png';
-import Menswatch from '../assets/Menswatchcollection.webp';
-import Womenswatch from '../assets/Womenswatchcollection.webp';
-import wallclock from "../assets/wallcolock.avif"
 
 
 // Component Structure: This is now a Server Component
@@ -35,36 +22,19 @@ export default async function HomePage() {
   // ----------------------------------------------------
   // SERVER SIDE LOGIC: Data Fetching (PRISMA INTEGRATION)
   // ----------------------------------------------------
-  const popularWatches = await getPopularWatches();
+  let popularWatches = [];
+  try {
+    // Only fetch the minimum data needed for the homepage product grid
+    popularWatches = await getPopularWatches();
+  } catch (error) {
+    console.error("Failed to fetch popular watches:", error);
+    // Continue with an empty array if data fetching fails
+  }
 
   // ----------------------------------------------------
-  // CLIENT SIDE LOGIC (Moved to separate components or hooks)
-  // State for filtering/sliders must be handled in client components
-  // We'll move the filter state logic to a new client component wrapper if needed,
-  // but for the homepage, we will simplify the data flow.
-  // The hero slider state MUST be managed in a client component.
+  // STATIC DATA - Uncomment once image paths are fixed
   // ----------------------------------------------------
-  
-  // Note: We'll extract the Hero Slider into its own client component for state management.
-  const HeroSlider = () => {
-      const [currentSlide, setCurrentSlide] = useState(0);
-      
-      // Since this is a server component, we can't use useState here.
-      // This is the common Next.js pattern: extract stateful logic to a
-      // **Client Component** (marked with "use client").
-      // For brevity, I'll provide the new structure by placing the slider logic
-      // in a file like /components/HeroSlider.jsx and marking it "use client".
-      return (
-          <div className="text-center py-4 bg-red-100">
-              {/* This is a placeholder, as the slider logic is now incorrect for a Server Component */}
-              <p className="text-red-700">
-                ⚠️ Slider State must be moved to a **Client Component**!
-              </p>
-          </div>
-      )
-  };
-
-  // Static Data (Can stay here in the Server Component)
+  /*
   const brands = [
     { name: "Fastrack", logo: Fastracklogo },
     { name: "Titan", logo: Titanlogo },
@@ -73,23 +43,16 @@ export default async function HomePage() {
     { name: "Fossil", logo: Fossillogo },
     { name: "Police", logo: Policelogo },
   ];
-
-  // NOTE: The `filters` state, `isFilterOpen` state, and `handleFilterChange` 
-  // must be moved out of this Server Component and into a **Client Component** // (like a new `WatchesPageWrapper` if you decide to have a separate page for filtering).
+  */
 
   return (
     <div className="bg-gray-50 w-full min-h-screen relative">
-      {/* Navbar is typically a Client Component but can be placed here */}
-      <Navbar /> 
+      <Navbar />
 
-      {/* HERO SLIDER (Replace with a dedicated Client Component) */}
-      {/* For this example, we keep the structure but note the need for "use client" in a separate file */}
-      <div className="relative h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] w-full bg-gradient-to-r from-blue-100 to-gray-100 overflow-hidden">
-        {/* ... Hero Slider content (must be made a client component) ... */}
-        {/* Placeholder: You need to create /components/HeroSlider.jsx with "use client" */}
-      </div>
+      {/* HERO SLIDER - Must be a "use client" component */}
+      <HeroSlideshow />
 
-      {/* CATEGORY SECTION - Use Next.js Link */}
+      {/* CATEGORY SECTION - Using Next.js Link and image paths from /public */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
           Shop by Category
@@ -97,28 +60,47 @@ export default async function HomePage() {
         <div className="flex flex-col sm:flex-row gap-6">
           {/* Men's Collection */}
           <div className="flex-1 relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl">
-            <Link href="/watches-men"> {/* Changed to Next.js Link */}
-              {/* ... category image and overlay content ... */}
+            <Link href="/watches-men">
+              <div className="absolute inset-0 bg-black/30 z-10 transition-opacity group-hover:bg-black/40 flex items-center justify-center">
+                  <span className="text-white text-xl font-semibold z-20">Men's Watches</span>
+              </div>
+              {/* Using a direct path if asset is in /public/assets */}
+              <img src="/assets/Menswatchcollection.webp" alt="Men's Watch Collection" className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
             </Link>
           </div>
+          
           {/* Women's Collection */}
           <div className="flex-1 relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl">
             <Link href="/watches-women">
-              {/* ... category image and overlay content ... */}
+              <div className="absolute inset-0 bg-black/30 z-10 transition-opacity group-hover:bg-black/40 flex items-center justify-center">
+                  <span className="text-white text-xl font-semibold z-20">Women's Watches</span>
+              </div>
+              <img src="/assets/Womenswatchcollection.webp" alt="Women's Watch Collection" className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
             </Link>
           </div>
+          
           {/* Wall Clocks Collection */}
           <div className="flex-1 relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl">
             <Link href="/wall-clocks">
-              {/* ... category image and overlay content ... */}
+              <div className="absolute inset-0 bg-black/30 z-10 transition-opacity group-hover:bg-black/40 flex items-center justify-center">
+                  <span className="text-white text-xl font-semibold z-20">Wall Clocks</span>
+              </div>
+              <img src="/assets/wallcolock.avif" alt="Wall Clock Collection" className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
             </Link>
           </div>
         </div>
       </div>
-
+      
       {/* BRAND SECTION */}
+      {/* ⚠️ To fix this section, you must either fix the image imports or use direct paths from the public folder. */}
       <section className="bg-white py-12 px-6">
-        {/* ... Brands content (unchanged) ... */}
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Featured Brands</h2>
+          <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
+              {/* Replace with a mapping of the 'brands' array once images are fixed */}
+              <div className="h-10 w-24 flex items-center justify-center"><img src="/assets/titan.png" alt="Titan Logo" className="max-h-full max-w-full object-contain" /></div>
+              <div className="h-10 w-24 flex items-center justify-center"><img src="/assets/Fastrack_logo.svg.png" alt="Fastrack Logo" className="max-h-full max-w-full object-contain" /></div>
+              <div className="h-10 w-24 flex items-center justify-center"><img src="/assets/Fossil-Logo.png" alt="Fossil Logo" className="max-h-full max-w-full object-contain" /></div>
+          </div>
       </section>
 
       {/* PRODUCT SECTION: Displaying Data from Prisma */}
@@ -132,7 +114,6 @@ export default async function HomePage() {
                 price={watch.price} 
                 brand={watch.brand} 
                 image={watch.imageUrl} 
-                // Pass other props your WatchCard needs
             />
           ))}
           {popularWatches.length === 0 && (
@@ -141,6 +122,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Floating Filter Button (Client Component) for mobile */}
+      <FloatingFilterButton />
+      
       {/* TESTIMONIALS & OTHER SECTIONS */}
       <StorySection />
       <TestimonialSection />

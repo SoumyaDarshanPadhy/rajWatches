@@ -37,7 +37,7 @@ function SingleWatch({ watch }) {
 
   return (
     <a
-      href={`/product/${watch.id}`}
+      href={`/watches/product/${watch.id}`}
       className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col cursor-pointer"
     >
       {/* Image Slideshow */}

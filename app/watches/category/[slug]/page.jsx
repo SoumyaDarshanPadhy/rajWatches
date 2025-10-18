@@ -33,8 +33,9 @@ const PriceDisplay = ({ price, discountedPrice }) => {
 };
 
 export default async function CategoryPage({ params, searchParams }) {
-    const slug = params.slug; 
-    const brand = searchParams?.brand || null; 
+    // FIX APPLIED: Await params and searchParams before accessing properties.
+    const slug = await params.slug; 
+    const brand = await searchParams?.brand || null; 
 
     // Map URL slug to DB category (Logic Unchanged)
     const categoryMap = {
@@ -68,7 +69,7 @@ export default async function CategoryPage({ params, searchParams }) {
     const categoryTitle = slug.charAt(0).toUpperCase() + slug.slice(1);
     
     // -------------------------------------------------------------------------
-    // RENDER: NO RESULTS FOUND (Full-width white background)
+    // RENDER: NO RESULTS FOUND
     // -------------------------------------------------------------------------
     if (!watches.length) {
         return (
@@ -91,12 +92,10 @@ export default async function CategoryPage({ params, searchParams }) {
     }
     
     // -------------------------------------------------------------------------
-    // RENDER: PRODUCT LISTING (Full-width white background with centered content)
+    // RENDER: PRODUCT LISTING
     // -------------------------------------------------------------------------
     return (
-        // Full width container with white background
         <section className="bg-white min-h-screen w-full"> 
-            {/* Centered content container */}
             <div className="max-w-7xl mx-auto py-16 px-4 md:px-8">
                 
                 {/* Header / Title Section */}
@@ -116,36 +115,46 @@ export default async function CategoryPage({ params, searchParams }) {
 
                 {/* Product Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-12">
-                    {watches.map((watch) => (
-                        <Link
-                            key={watch.id}
-                            href={`/watches/product/${watch.id}`}
-                            // Clean, white card with a subtle shadow and scale on hover
-                            className="group block rounded-xl p-4 bg-white transition duration-300 transform hover:shadow-2xl hover:scale-[1.03] overflow-hidden" 
-                        >
-                            {/* Image Container with Aspect Ratio */}
-                            <div className="relative w-full aspect-[4/5] h-56 mb-4 overflow-hidden rounded-lg shadow-md bg-gray-100">
-                                <Image
-                                    src={watch.images?.[0] || "/placeholder.jpg"}
-                                    alt={watch.name}
-                                    fill
-                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                                    className="object-cover transition duration-500 group-hover:scale-105" 
-                                    priority={true} 
-                                />
-                            </div>
+                    {watches.map((watch) => {
+                        
+                        // 🔥 FIX FOR IMAGE URL CONCATENATION/INVALID UPSTREAM RESPONSE:
+                        // Safely convert the 'images' field to an array if it's stored as a comma-separated string,
+                        // otherwise use it directly (assuming it's already an array from Prisma).
+                        const imagesArray = Array.isArray(watch.images) 
+                            ? watch.images 
+                            : (typeof watch.images === 'string' ? watch.images.split(',') : []); 
 
-                            {/* Product Details */}
-                            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">{watch.brand}</p>
-                            <h2 className="text-base md:text-lg font-bold text-gray-800 truncate transition mt-1">
-                                {watch.name}
-                            </h2>
+                        return (
+                            <Link
+                                key={watch.id}
+                                href={`/watches/product/${watch.id}`}
+                                className="group block rounded-xl p-4 bg-white transition duration-300 transform hover:shadow-2xl hover:scale-[1.03] overflow-hidden" 
+                            >
+                                {/* Image Container with Aspect Ratio */}
+                                <div className="relative w-full aspect-[4/5] h-56 mb-4 overflow-hidden rounded-lg shadow-md bg-gray-100">
+                                    <Image
+                                        // Use the first element of the safely processed array
+                                        src={imagesArray[0] || "/placeholder.jpg"}
+                                        alt={watch.name}
+                                        fill
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                                        className="object-cover transition duration-500 group-hover:scale-105" 
+                                        priority={true} 
+                                    />
+                                </div>
 
-                            {/* Price Display using the helper component */}
-                            <PriceDisplay price={watch.price} discountedPrice={watch.discountedPrice} />
-                            
-                        </Link>
-                    ))}
+                                {/* Product Details */}
+                                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">{watch.brand}</p>
+                                <h2 className="text-base md:text-lg font-bold text-gray-800 truncate transition mt-1">
+                                    {watch.name}
+                                </h2>
+
+                                {/* Price Display using the helper component */}
+                                <PriceDisplay price={watch.price} discountedPrice={watch.discountedPrice} />
+                                
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
         </section>

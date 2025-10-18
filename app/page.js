@@ -18,7 +18,7 @@ import { ChevronRight } from "lucide-react";
 import { getPopularWatches } from "../lib/watchService";
 
 // Images (Static imports are fine in Server Components, provided paths are correct)
-import Fastracklogo from '../assets/Fastrack_logo.svg.png';
+import Fastracklogo from '../assets/Fastrack_logo.png';
 import Sonatalogo from '../assets/sonata_logo.jpg';
 import Titanlogo from '../assets/titan.png';
 import Timexlogo from '../assets/timex.png';

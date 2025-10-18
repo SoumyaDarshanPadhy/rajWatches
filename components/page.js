@@ -133,7 +133,7 @@ export default async function HomePage() {
           </div>
           <div className="h-10 w-24 flex items-center justify-center">
             <Image
-              src="/assets/Fastrack_logo.svg.png"
+              src="/assets/Fastrack_logo.png"
               alt="Fastrack Logo"
               width={96}
               height={40}

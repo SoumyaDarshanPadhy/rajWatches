@@ -15,12 +15,19 @@ export default async function ProductPage({ params }) {
     );
   }
 
+  // Normalize image URLs in case any array entry accidentally contains multiple URLs
+  const imageUrls = Array.isArray(product?.images)
+    ? product.images.flatMap((s) =>
+        typeof s === "string" ? s.match(/https?:\/\/\S+/g) || [] : []
+      )
+    : [];
+
   return (
     <section className="p-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
       <div>
-        {product.images?.length ? (
+        {imageUrls.length ? (
           <Image
-            src={product.images[0]}
+            src={imageUrls[0]}
             alt={product.name}
             width={600}
             height={600}
@@ -31,9 +38,9 @@ export default async function ProductPage({ params }) {
             No Image
           </div>
         )}
-        {product.images?.length > 1 && (
+        {imageUrls.length > 1 && (
           <div className="flex gap-3 mt-3">
-            {product.images.slice(1).map((img, idx) => (
+            {imageUrls.slice(1).map((img, idx) => (
               <Image
                 key={idx}
                 src={img}
@@ -60,7 +67,9 @@ export default async function ProductPage({ params }) {
             </span>
           )}
         </div>
-        <p className="text-gray-700 mb-6 leading-relaxed">{product.description}</p>
+        <p className="text-gray-700 mb-6 leading-relaxed">
+          {product.description}
+        </p>
 
         <div className="flex items-center gap-4">
           <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">

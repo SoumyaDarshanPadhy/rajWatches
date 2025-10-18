@@ -73,7 +73,25 @@ const transformedData = deduplicatedRawData.map(w => {
 
 async function main() {
     console.log('Clearing existing database records...');
+    
+    // --- FIX START: Delete Dependent Records First (Reverse Dependency Order) ---
+    // The database is blocking deletion of 'Watch' because 'OrderItem' references it.
+    await prisma.orderItem.deleteMany({});
+    console.log('Cleared OrderItem records.');
+    
+    // If you have a 'CartItem' model that references 'Watch', you must delete those too:
+    // await prisma.cartItem.deleteMany({});
+    // console.log('Cleared CartItem records.');
+    
+    // If you have an 'Order' model that references 'User', you may want to clear that as well:
+    // await prisma.order.deleteMany({});
+    // console.log('Cleared Order records.');
+    // --- FIX END ---
+    
+    // This is now safe, as dependent OrderItem records have been deleted.
     await prisma.watch.deleteMany({}); 
+    console.log('Cleared Watch records.');
+
 
     console.log(`Start seeding ${transformedData.length} unique records...`);
     // Note: The denominator for removed records should be the deduplicated count to be accurate
@@ -90,23 +108,23 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
-    console.error("Seeding Error:", e);
-    
-    if (e.code === 'P2002') {
-        console.error("\n--- FATAL ERROR: P2002 Persistence ---");
-        console.error("The unique constraint failed even after programmatic deduplication and clearing the DB. This is highly unexpected.");
-        console.error("--------------------------------------\n");
-    }
-    // Added a check for the common price error to give a better hint
-    if (e.message.includes('Expected Float, provided String')) {
-        console.error("\n--- FIX HINT: Data Type Mismatch ---");
-        console.error("The error is still related to the 'price' or 'discountedPrice' being passed as a string.");
-        console.error("Ensure the 'cleanPrice' function above correctly handles ALL your price data formats.");
-        console.error("--------------------------------------\n");
-    }
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect(); 
-  });
+    .catch((e) => {
+        console.error("Seeding Error:", e);
+        
+        if (e.code === 'P2002') {
+            console.error("\n--- FATAL ERROR: P2002 Persistence ---");
+            console.error("The unique constraint failed even after programmatic deduplication and clearing the DB. This is highly unexpected.");
+            console.error("--------------------------------------\n");
+        }
+        // Added a check for the common price error to give a better hint
+        if (e.message.includes('Expected Float, provided String')) {
+            console.error("\n--- FIX HINT: Data Type Mismatch ---");
+            console.error("The error is still related to the 'price' or 'discountedPrice' being passed as a string.");
+            console.error("Ensure the 'cleanPrice' function above correctly handles ALL your price data formats.");
+            console.error("--------------------------------------\n");
+        }
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect(); 
+    });

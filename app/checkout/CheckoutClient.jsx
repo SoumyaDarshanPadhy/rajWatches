@@ -3,17 +3,22 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+// Environment variable for Razorpay Key ID
 const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
 /**
- * Dynamically load Razorpay SDK
+ * Dynamically loads the Razorpay checkout script.
+ * @param {string} src - The URL of the script.
+ * @returns {Promise<boolean>} - True if script loaded successfully, false otherwise.
  */
 const loadScript = (src) => {
   return new Promise((resolve) => {
+    // Check if script is already present
     if (document.querySelector(`script[src="${src}"]`)) {
       resolve(true);
       return;
     }
+
     const script = document.createElement('script');
     script.src = src;
     script.onload = () => resolve(true);
@@ -26,6 +31,7 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const productId = searchParams.get('productId');
 
+  // State
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -38,22 +44,22 @@ export default function CheckoutPage() {
     pincode: '',
   });
 
-  /** Load Razorpay SDK once */
+  // Effect to load Razorpay script on component mount
   useEffect(() => {
     loadScript('https://checkout.razorpay.com/v1/checkout.js');
   }, []);
 
-  /** Fetch product details */
+  // Effect to fetch product details based on productId
   useEffect(() => {
     if (!productId) return;
 
     const fetchProduct = async () => {
       try {
         const res = await fetch(`/api/products/${productId}`);
-        const contentType = res.headers.get("content-type");
+        const contentType = res.headers.get('content-type');
 
-        if (!res.ok || !contentType?.includes("application/json")) {
-          setMessage("⚠️ Product not found or server error");
+        if (!res.ok || !contentType?.includes('application/json')) {
+          setMessage('⚠️ Product not found or server error');
           return;
         }
 
@@ -68,15 +74,20 @@ export default function CheckoutPage() {
     fetchProduct();
   }, [productId]);
 
-  /** Handle input field changes */
+  /**
+   * Handles changes in the form input fields.
+   */
   const handleInputChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  /** Handle checkout click */
+  /**
+   * Initiates the checkout process: creates an order and opens the Razorpay payment window.
+   */
   const handleCheckout = async () => {
     const { customerName, customerEmail, phoneNumber, address, pincode } = formData;
 
+    // Client-side validation
     if (!customerName || !customerEmail || !phoneNumber || !address || !pincode) {
       setMessage('❌ Please fill all required fields!');
       return;
@@ -91,7 +102,9 @@ export default function CheckoutPage() {
     setMessage('Creating order...');
 
     try {
-      // 1️⃣ Create order backend call
+      // 1. Create Order API Call
+      const shippingAddress = `${address}, ${pincode}`;
+
       const orderResponse = await fetch('/api/order/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,32 +113,33 @@ export default function CheckoutPage() {
           customerName,
           customerEmail,
           phoneNumber,
-          shippingAddress: `${address}, ${pincode}`,
+          shippingAddress,
           totalPrice: product.price * quantity,
         }),
       });
 
       const orderData = await orderResponse.json();
+
       if (!orderResponse.ok) {
         setMessage(`Order creation failed: ${orderData.message}`);
         setLoading(false);
         return;
       }
 
-      setMessage('Order created. Opening payment window...');
-
-      // 2️⃣ Razorpay options
+      // 2. Configure and Open Razorpay Payment Window
       const options = {
         key: RAZORPAY_KEY_ID,
-        amount: orderData.amount, // in paise
+        amount: orderData.amount,
         currency: orderData.currency,
         name: 'Watch E-Store',
         description: 'Purchase Watch Order',
         order_id: orderData.razorpayOrderId,
+        
+        // Payment success handler
         handler: async function (response) {
           setMessage('Payment successful. Verifying order...');
 
-          // 3️⃣ Verify payment backend call
+          // 3. Verification API Call
           const verificationResponse = await fetch('/api/order/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -135,7 +149,7 @@ export default function CheckoutPage() {
               razorpay_signature: response.razorpay_signature,
               customerName,
               customerEmail,
-              shippingAddress: `${address}, ${pincode}`,
+              shippingAddress,
               orderId: orderData.orderId,
               items: [{ watchId: product.id, quantity }],
             }),
@@ -144,9 +158,8 @@ export default function CheckoutPage() {
           const verificationData = await verificationResponse.json();
 
           if (verificationResponse.ok && verificationData.verified) {
-            setMessage(`✅ Payment & Order Confirmed! Order ID: ${verificationData.orderId}`);
-
-            // Reset form and quantity
+            setMessage(`✅ Payment confirmed! Order ID: ${verificationData.orderId}`);
+            // Clear form and reset quantity on successful order
             setFormData({
               customerName: '',
               customerEmail: '',
@@ -156,20 +169,26 @@ export default function CheckoutPage() {
             });
             setQuantity(1);
           } else {
-            setMessage(`❌ Verification Failed: ${verificationData.message || 'Payment not secure.'}`);
+            setMessage(`❌ Verification failed: ${verificationData.message || 'Payment not secure.'}`);
           }
           setLoading(false);
         },
+        
+        // Pre-fill customer details
         prefill: { name: customerName, email: customerEmail, contact: phoneNumber },
-        theme: { color: '#111827' },
+        theme: { color: '#1E293B' }, // slate blue tone
       };
 
       const rzp = new window.Razorpay(options);
+
+      // Payment failure handler
       rzp.on('payment.failed', (response) => {
         setMessage(`❌ Payment Failed: ${response.error.description}`);
         setLoading(false);
       });
+
       rzp.open();
+
     } catch (error) {
       console.error('Checkout error:', error);
       setMessage('❌ Something went wrong!');
@@ -177,75 +196,80 @@ export default function CheckoutPage() {
     }
   };
 
-  /** UI Render */
+  // --- Rendered Component ---
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h1 className="text-2xl font-bold mb-6 text-center">Checkout</h1>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex justify-center items-start py-12 px-4">
+      <div className="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-8 border border-gray-100">
+        <h1 className="text-3xl font-semibold text-gray-900 text-center mb-8">
+          Secure Checkout
+        </h1>
 
-      {/* Product Summary */}
-      {product ? (
-        <div className="flex flex-col sm:flex-row items-center gap-6 mb-6 border-b pb-6">
-          <img
-            src={product.images?.[0] || '/placeholder.jpg'}
-            alt={product.name}
-            className="w-48 h-48 object-cover rounded-lg shadow"
-          />
-          <div className="text-center sm:text-left">
-            <h2 className="text-xl font-semibold">{product.name}</h2>
-            <p className="text-gray-600 mt-1">₹{product.price.toLocaleString()}</p>
+        {product ? (
+          <div className="flex flex-col sm:flex-row items-center gap-8 mb-8">
+            <img
+              src={product.images?.[0] || '/placeholder.jpg'}
+              alt={product.name}
+              className="w-48 h-48 object-cover rounded-xl border border-gray-200 shadow-sm"
+            />
+            <div className="text-center sm:text-left">
+              <h2 className="text-xl font-medium text-gray-800">{product.name}</h2>
+              <p className="text-gray-600 mt-1 text-lg">₹{product.price.toLocaleString()}</p>
 
-            <div className="flex items-center gap-3 mt-3 justify-center sm:justify-start">
-              <label className="text-gray-700 font-medium">Quantity:</label>
+              <div className="flex items-center gap-3 mt-4 justify-center sm:justify-start">
+                <label className="text-gray-700 font-medium">Quantity:</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value))}
+                  className="border border-gray-300 rounded-md w-16 text-center py-1 focus:outline-none focus:ring-2 focus:ring-gray-800"
+                />
+              </div>
+
+              <p className="mt-4 text-lg font-semibold text-gray-900">
+                Total: ₹{(product.price * quantity).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 mb-6">Loading product details...</p>
+        )}
+
+        <div className="space-y-5">
+          {['customerName', 'customerEmail', 'phoneNumber', 'address', 'pincode'].map((field) => (
+            <div key={field}>
+              <label className="block text-gray-700 mb-1 capitalize font-medium">
+                {field.replace(/([A-Z])/g, ' $1')}
+              </label>
               <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value))}
-                className="border border-gray-300 rounded-md w-16 text-center py-1"
+                type={field === 'customerEmail' ? 'email' : 'text'}
+                name={field}
+                value={formData[field]}
+                onChange={handleInputChange}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition"
+                placeholder={`Enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                required
               />
             </div>
-
-            <p className="mt-3 text-lg font-semibold">
-              Total: ₹{(product.price * quantity).toLocaleString()}
-            </p>
-          </div>
+          ))}
         </div>
-      ) : (
-        <p className="text-center text-gray-500 mb-6">Loading product details...</p>
-      )}
 
-      {/* Checkout Form */}
-      <form className="space-y-4">
-        {['customerName', 'customerEmail', 'phoneNumber', 'address', 'pincode'].map((field) => (
-          <div key={field} className="flex flex-col">
-            <label className="text-gray-700 mb-1 capitalize">{field.replace(/([A-Z])/g, ' $1')}</label>
-            <input
-              type={field === 'customerEmail' ? 'email' : 'text'}
-              name={field}
-              value={formData[field]}
-              onChange={handleInputChange}
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-        ))}
-      </form>
+        <button
+          onClick={handleCheckout}
+          disabled={loading || !RAZORPAY_KEY_ID}
+          className="w-full mt-8 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-transform active:scale-95 shadow-md"
+        >
+          {loading ? 'Processing...' : 'Pay & Place Order'}
+        </button>
 
-      <button
-        onClick={handleCheckout}
-        disabled={loading || !RAZORPAY_KEY_ID}
-        className="w-full mt-6 py-3 bg-black text-white font-semibold rounded-md hover:bg-gray-800 transition"
-      >
-        {loading ? 'Processing...' : 'Pay & Place Order'}
-      </button>
+        <p className="mt-5 text-center text-gray-700 font-medium">{message}</p>
 
-      <p className="mt-4 text-center font-medium text-gray-700">{message}</p>
-
-      {!RAZORPAY_KEY_ID && (
-        <p className="mt-2 text-center text-red-500">
-          ⚠️ Missing Razorpay Key ID! Set NEXT_PUBLIC_RAZORPAY_KEY_ID in .env
-        </p>
-      )}
+        {!RAZORPAY_KEY_ID && (
+          <p className="mt-2 text-center text-red-500 text-sm">
+            ⚠️ Missing Razorpay Key ID — set NEXT_PUBLIC_RAZORPAY_KEY_ID in .env
+          </p>
+        )}
+      </div>
     </div>
   );
 }

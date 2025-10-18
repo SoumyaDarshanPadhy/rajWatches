@@ -26,7 +26,7 @@ import Fossillogo from '../assets/Fossil-Logo.png';
 import Policelogo from '../assets/Police-logo.png';
 import Menswatch from '../assets/Menswatchcollection.webp'; 
 import Womenswatch from '../assets/Womenswatchcollection.webp';
-import wallclock from "../assets/wallcolock.avif"
+import wallclock from "../assets/wallcolock.png"
 
 // Component Structure: This is a Server Component
 export default async function HomePage() {

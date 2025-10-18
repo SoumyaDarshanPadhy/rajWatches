@@ -103,7 +103,7 @@ export default async function HomePage() {
                 </span>
               </div>
               <Image
-                src="/assets/wallcolock.avif"
+                src="/assets/wallcolock.png"
                 alt="Wall Clock Collection"
                 width={400}
                 height={220}

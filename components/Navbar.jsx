@@ -72,10 +72,10 @@ function Navbar() {
               <span>Account</span>
             </button>
           </a> */}
-          <a href="/cart" className="relative">
+          {/* <a href="/cart" className="relative">
             <ShoppingBag size={24} className="text-gray-700 hover:text-black" />
             <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">0</span>
-          </a>
+          </a> */}
         </div>
       </div>
 

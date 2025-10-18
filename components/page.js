@@ -1,13 +1,13 @@
-"use client"
 import Link from "next/link";
+import Image from "next/image";
 import WatchCard from "@/components/ProductGrid";
-import FilterSidebar from "@/components/FilterSidebar"; 
-import Navbar from "@/components/Navbar"; 
+import FilterSidebar from "@/components/FilterSidebar";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TestimonialSection from "@/components/TestimonialSection";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import StorySection from "@/components/StorySection";
-import HeroSlideshow from "@/components/HeroSlideshow"; 
+import HeroSlideshow from "@/components/HeroSlideshow";
 import FloatingFilterButton from "@/components/FloatingFilterButton";
 
 // 3. Lucide-react icons are fine (used in client/server components)
@@ -15,7 +15,6 @@ import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
 // 4. Server-side data fetching utility
 import { getPopularWatches } from "../lib/watchService";
-
 
 // Component Structure: This is now a Server Component
 export default async function HomePage() {
@@ -62,75 +61,129 @@ export default async function HomePage() {
           <div className="flex-1 relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl">
             <Link href="/watches-men">
               <div className="absolute inset-0 bg-black/30 z-10 transition-opacity group-hover:bg-black/40 flex items-center justify-center">
-                  <span className="text-white text-xl font-semibold z-20">Men's Watches</span>
+                <span className="text-white text-xl font-semibold z-20">
+                  Men&apos;s Watches
+                </span>
               </div>
               {/* Using a direct path if asset is in /public/assets */}
-              <img src="/assets/Menswatchcollection.webp" alt="Men's Watch Collection" className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
+              <Image
+                src="/assets/Menswatchcollection.webp"
+                alt="Men's Watch Collection"
+                width={400}
+                height={220}
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+              />
             </Link>
           </div>
-          
+
           {/* Women's Collection */}
           <div className="flex-1 relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl">
             <Link href="/watches-women">
               <div className="absolute inset-0 bg-black/30 z-10 transition-opacity group-hover:bg-black/40 flex items-center justify-center">
-                  <span className="text-white text-xl font-semibold z-20">Women's Watches</span>
+                <span className="text-white text-xl font-semibold z-20">
+                  Women&apos;s Watches
+                </span>
               </div>
-              <img src="/assets/Womenswatchcollection.webp" alt="Women's Watch Collection" className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
+              <Image
+                src="/assets/Womenswatchcollection.webp"
+                alt="Women's Watch Collection"
+                width={400}
+                height={220}
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+              />
             </Link>
           </div>
-          
+
           {/* Wall Clocks Collection */}
           <div className="flex-1 relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl">
             <Link href="/wall-clocks">
               <div className="absolute inset-0 bg-black/30 z-10 transition-opacity group-hover:bg-black/40 flex items-center justify-center">
-                  <span className="text-white text-xl font-semibold z-20">Wall Clocks</span>
+                <span className="text-white text-xl font-semibold z-20">
+                  Wall Clocks
+                </span>
               </div>
-              <img src="/assets/wallcolock.avif" alt="Wall Clock Collection" className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
+              <Image
+                src="/assets/wallcolock.avif"
+                alt="Wall Clock Collection"
+                width={400}
+                height={220}
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+              />
             </Link>
           </div>
         </div>
       </div>
-      
+
       {/* BRAND SECTION */}
       {/* ⚠️ To fix this section, you must either fix the image imports or use direct paths from the public folder. */}
       <section className="bg-white py-12 px-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Featured Brands</h2>
-          <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
-              {/* Replace with a mapping of the 'brands' array once images are fixed */}
-              <div className="h-10 w-24 flex items-center justify-center"><img src="/assets/titan.png" alt="Titan Logo" className="max-h-full max-w-full object-contain" /></div>
-              <div className="h-10 w-24 flex items-center justify-center"><img src="/assets/Fastrack_logo.svg.png" alt="Fastrack Logo" className="max-h-full max-w-full object-contain" /></div>
-              <div className="h-10 w-24 flex items-center justify-center"><img src="/assets/Fossil-Logo.png" alt="Fossil Logo" className="max-h-full max-w-full object-contain" /></div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          Featured Brands
+        </h2>
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
+          {/* Replace with a mapping of the 'brands' array once images are fixed */}
+          <div className="h-10 w-24 flex items-center justify-center">
+            <Image
+              src="/assets/titan.png"
+              alt="Titan Logo"
+              width={96}
+              height={40}
+              className="max-h-full max-w-full object-contain"
+            />
           </div>
+          <div className="h-10 w-24 flex items-center justify-center">
+            <Image
+              src="/assets/Fastrack_logo.svg.png"
+              alt="Fastrack Logo"
+              width={96}
+              height={40}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+          <div className="h-10 w-24 flex items-center justify-center">
+            <Image
+              src="/assets/Fossil-Logo.png"
+              alt="Fossil Logo"
+              width={96}
+              height={40}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+        </div>
       </section>
 
       {/* PRODUCT SECTION: Displaying Data from Prisma */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Popular Watches</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          Popular Watches
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {popularWatches.map((watch) => (
-            <WatchCard 
-                key={watch.id} 
-                name={watch.name} 
-                price={watch.price} 
-                brand={watch.brand} 
-                image={watch.imageUrl} 
+            <WatchCard
+              key={watch.id}
+              name={watch.name}
+              price={watch.price}
+              brand={watch.brand}
+              image={watch.imageUrl}
             />
           ))}
           {popularWatches.length === 0 && (
-            <p className="col-span-full text-center text-gray-600">No popular watches found at the moment.</p>
+            <p className="col-span-full text-center text-gray-600">
+              No popular watches found at the moment.
+            </p>
           )}
         </div>
       </section>
 
       {/* Floating Filter Button (Client Component) for mobile */}
       <FloatingFilterButton />
-      
+
       {/* TESTIMONIALS & OTHER SECTIONS */}
       <StorySection />
       <TestimonialSection />
       <WhyChooseUs />
-      
-      <Footer /> 
+
+      <Footer />
     </div>
   );
 }

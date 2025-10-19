@@ -5,15 +5,15 @@ import { Quote } from "lucide-react";
 const reviews = [
   {
     text: "I’ve been wearing my RajWatches watch for over a year now, and it still looks as stunning as the day I bought it. The craftsmanship, attention to detail, and timeless design truly set it apart. It’s more than just a timepiece — it’s a statement of class.",
-    name: "— Rohan Mehta",
+    name: "— Sidhant Pandey",
   },
   {
     text: "What drew me to RajWatches was their commitment to sustainability. Knowing my watch was made with eco-friendly materials makes it even more special. It’s stylish, durable, and aligns perfectly with my values.",
-    name: "— Aisha Khan",
+    name: "— Soumya Ranjan Nanda",
   },
   {
     text: "Every time I wear my RajWatches watch, I get compliments. The weight, finish, and design scream luxury. It’s become my go-to accessory for both business meetings and evening events.",
-    name: "— Karan Patel",
+    name: "— Om Prakash Deo",
   },
 ];
 

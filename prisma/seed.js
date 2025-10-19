@@ -17,93 +17,68 @@ const rawWatchData = data.Sheet1 || data;
 const uniqueModelNumbers = new Set();
 
 const deduplicatedRawData = rawWatchData.filter((w) => {
-  // We use the raw 'SL Number' or 'modelNumber' field to check for uniqueness
-  const modelNumKey = w["SL Number"] || w.modelNumber;
+  // Use the correct JSON field name: "SL Number" (capitalized)
+  const modelNumKey = w["SL Number"];
 
-  // Ensure the key exists and has a value
-  if (modelNumKey && modelNumKey.trim() !== "") {
-    const modelNumber = modelNumKey.trim();
+  if (modelNumKey && String(modelNumKey).trim() !== "") {
+    const modelNumber = String(modelNumKey).trim();
     if (uniqueModelNumbers.has(modelNumber)) {
-      // Duplicate found, filter it out
       return false;
     } else {
-      // New record, keep it and add it to the Set
       uniqueModelNumbers.add(modelNumber);
       return true;
     }
   }
-  // Filter out records with no model number (which would violate the non-optional constraint)
   return false;
 });
 
 // --- STEP 2: Data Transformation to match the CLEANED schema ---
 const transformedData = deduplicatedRawData.map((w) => {
-  // Extract all URLs robustly, handling both \n and \r\n line breaks and any extra whitespace
+  // Extract all URLs from "Image Links" field (note the capital letters)
   const imagesArray =
-    (w.images || "").toString().match(/https?:\/\/\S+/g) || [];
+    (w["Image Links"] || "").toString().match(/https?:\/\/\S+/g) || [];
 
-  // --- PRICE CLEANING AND CONVERSION (The Fix) ---
   // Function to clean price string (removes commas and converts to float)
   const cleanPrice = (priceStr) => {
     if (!priceStr) return 0.0;
-    // Remove commas, trim whitespace, and parse as a Float
     const cleaned = String(priceStr).replace(/,/g, "").trim();
-    // Return the parsed float, or 0 if parsing fails (for safety)
     return parseFloat(cleaned) || 0.0;
   };
-  // ----------------------------------------------------
 
   return {
-    // Use the key with the space and trim the value.
-    name: String((w["name "] || "").trim() ?? ""),
-
-    // **FIXED:** Convert price fields to Float
-    price: cleanPrice(w.price),
-    discountedPrice: cleanPrice(w.discountedPrice),
-
-    // Ensure other required fields are safely coerced to strings
-    brand: String(w.brand ?? ""),
-    modelNumber: String((w["SL Number"] || w.modelNumber || "").trim() ?? ""),
-    category: String(w.category ?? ""),
-    description: String(w.description ?? ""),
-
+    // Map JSON fields (capitalized) to Prisma schema fields (camelCase)
+    name: String(w["Name"] || "").trim(),
+    price: cleanPrice(w["Price"]),
+    discountedPrice: cleanPrice(w["Discounted Price"]),
+    brand: String(w["Brand Name"] || "").trim(),
+    modelNumber: String(w["SL Number"] || "").trim(),
+    category: String(w["Category"] || "").trim().toLowerCase(),
+    description: String(w["Description"] || "").trim(),
     images: imagesArray,
-    // Ensure inStock is an integer
-    inStock: parseInt(w.inStock) || 10,
+    inStock: 10, // Default stock value
   };
 });
 
 async function main() {
   console.log("Clearing existing database records...");
 
-  // --- FIX START: Delete Dependent Records First (Reverse Dependency Order) ---
-  // The database is blocking deletion of 'Watch' because 'OrderItem' references it.
+  // Delete dependent records first
   await prisma.orderItem.deleteMany({});
   console.log("Cleared OrderItem records.");
 
-  // If you have a 'CartItem' model that references 'Watch', you must delete those too:
+  // Uncomment if you have these models:
   // await prisma.cartItem.deleteMany({});
-  // console.log('Cleared CartItem records.');
-
-  // If you have an 'Order' model that references 'User', you may want to clear that as well:
   // await prisma.order.deleteMany({});
-  // console.log('Cleared Order records.');
-  // --- FIX END ---
 
-  // This is now safe, as dependent OrderItem records have been deleted.
   await prisma.watch.deleteMany({});
   console.log("Cleared Watch records.");
 
   console.log(`Start seeding ${transformedData.length} unique records...`);
-  // Note: The denominator for removed records should be the deduplicated count to be accurate
   console.log(
-    `Removed ${
-      rawWatchData.length - deduplicatedRawData.length
-    } initial duplicate records.`
+    `Removed ${rawWatchData.length - deduplicatedRawData.length} duplicate records.`
   );
 
   const creations = transformedData.map((w) =>
-    // The transformation (Step 2) ensures 'w' now has the correct data types
     prisma.watch.create({ data: w })
   );
 
@@ -120,20 +95,12 @@ main()
 
     if (e.code === "P2002") {
       console.error("\n--- FATAL ERROR: P2002 Persistence ---");
-      console.error(
-        "The unique constraint failed even after programmatic deduplication and clearing the DB. This is highly unexpected."
-      );
+      console.error("Unique constraint violation detected.");
       console.error("--------------------------------------\n");
     }
-    // Added a check for the common price error to give a better hint
     if (e.message.includes("Expected Float, provided String")) {
       console.error("\n--- FIX HINT: Data Type Mismatch ---");
-      console.error(
-        "The error is still related to the 'price' or 'discountedPrice' being passed as a string."
-      );
-      console.error(
-        "Ensure the 'cleanPrice' function above correctly handles ALL your price data formats."
-      );
+      console.error("Check price field conversion in cleanPrice function.");
       console.error("--------------------------------------\n");
     }
     process.exit(1);

@@ -85,14 +85,14 @@ const Contact = () => {
     {
       icon: <Mail className="h-6 w-6" />,
       title: "Email Us",
-      details: "ndxrajandraj@gmail.com",
+      details: "Praveen.chhatwani@gmail.com",
       subtitle: "We reply within 24 hours",
     },
     {
       icon: <Phone className="h-6 w-6" />,
       title: "Call Us",
       details: "8984509091",
-      subtitle: "Mon-Sat 9AM-10PM EST",
+      subtitle: "Mon-Sun 9AM-10PM EST",
     },
     {
       icon: <MapPin className="h-6 w-6" />,

@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "../components/Navbar";
@@ -6,43 +7,41 @@ import TestimonialSection from "../components/TestimonialSection";
 import WhyChooseUs from "../components/WhyChooseUs";
 import StorySection from "../components/StorySection";
 import Contact from "@/components/Contact";
-import ProductGrid from "../components/ProductGrid";
+// import RandomProductGrid from "../components/ProductGrid";
 import HeroSlideshow from "@/components/HeroSlideshow";
-import { ChevronRight } from "lucide-react";
-import { getPopularWatches } from "../lib/watchService";
+// import { getPopularWatches } from "../lib/watchService";
 
-// ✅ Direct URLs (NOT fetch)
-const Fastracklogo = "https://ik.imagekit.io/5qrepdiow/frontend/Fastrack_logo.svg.png?updatedAt=1760790199281";
-const Sonatalogo = "https://ik.imagekit.io/5qrepdiow/frontend/sonata_logo.jpg?updatedAt=1760790199342";
-const Policelogo = "https://ik.imagekit.io/5qrepdiow/frontend/Police-logo.png?updatedAt=1760790199177";
-const Fossillogo = "https://ik.imagekit.io/5qrepdiow/frontend/Fossil-Logo.png?updatedAt=1760790199281";
-const Timexlogo = "https://ik.imagekit.io/5qrepdiow/frontend/timex.png?updatedAt=1760790199331";
+const KennethColelogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/kenneth-cole-logo.png";
+const Tommylogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/Tommy_Hilfiger_Logo.png";
+const Ajantalogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/ajanta-logo.jpg";
+const Sonatalogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/sonata_logo.jpg";
+const Titanlogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/titan.png";
+const Fastracklogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/Fastrack_logo.svg.png";
+
 const Menswatch = "https://ik.imagekit.io/5qrepdiow/frontend/Menswatchcollection.webp?updatedAt=1760790199282";
 const Womenswatch = "https://ik.imagekit.io/5qrepdiow/frontend/Womenswatchcollection.webp?updatedAt=1760790199449";
 const wallclock = "https://ik.imagekit.io/5qrepdiow/frontend/wallcolock.avif?updatedAt=17607911075554";
-const Titanlogo = "https://ik.imagekit.io/5qrepdiow/frontend/titan.png?updatedAt=1760790199344";
-
 export default async function HomePage() {
-  let popularWatches = [];
-  try {
-    popularWatches = await getPopularWatches();
-  } catch (error) {
-    console.error("Failed to fetch popular watches:", error);
-  }
+  // let popularWatches = [];
+  // try {
+  //   popularWatches = await getPopularWatches();
+  // } catch (error) {
+  //   console.error("Failed to fetch popular watches:", error);
+  // }
 
   const brands = [
     { name: "Fastrack", logo: Fastracklogo, slug: "Fastrack" },
     { name: "Titan", logo: Titanlogo, slug: "Titan" },
     { name: "Sonata", logo: Sonatalogo, slug: "Sonata" },
-    { name: "Timex", logo: Timexlogo, slug: "Timex" },
-    { name: "Fossil", logo: Fossillogo, slug: "Fossil" },
-    { name: "Police", logo: Policelogo, slug: "Police" },
+    { name: "KennethCole", logo: KennethColelogo, slug: "KennethCole" },
+    { name: "Ajanta", logo: Ajantalogo, slug: "Ajanta" },
+    { name: "TommyHilfigher", logo: Tommylogo, slug: "TommyHilfigher" },
   ];
 
   const categoryData = [
     { name: "Gents Collection", image: Menswatch, link: "/watches/category/men" },
     { name: "Ladies Collection", image: Womenswatch, link: "/watches/category/women" },
-    { name: "Wall Watches", image: wallclock, link: "/watches/category/wallclocks" },
+    { name: "Wall Clocks", image: wallclock, link: "/watches/category/wallclocks" },
   ];
 
   return (
@@ -88,7 +87,7 @@ export default async function HomePage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pt-0">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Our Top Brands</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {brands.slice(0, 3).map((brand) => (
+            {brands.map((brand) => (
               <div
                 key={brand.name}
                 className="relative h-[220px] rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl"
@@ -118,15 +117,15 @@ export default async function HomePage() {
         </section>
 
         {/* POPULAR PRODUCTS */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white shadow-inner">
+        {/* <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white shadow-inner">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Popular Products</h2>
-          <ProductGrid watches={popularWatches} />
+          <RandomProductGrid watches={popularWatches} />
           {popularWatches.length === 0 && (
             <p className="text-center text-gray-600 mt-4">
               No popular watches found at the moment.
             </p>
           )}
-        </section>
+        </section> */}
 
         <StorySection />
         <TestimonialSection />

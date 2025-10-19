@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Star, ShoppingBag, ArrowRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Star, ShoppingBag } from "lucide-react";
 
-// Rupee Sign Inline SVG
+// Rupee Sign SVG
 const RupeeSign = ({ className = "text-sm" }) => (
   <svg
     className={className}
@@ -16,37 +18,33 @@ const RupeeSign = ({ className = "text-sm" }) => (
 );
 
 function SingleWatch({ watch }) {
-  const images = watch.images || [];
+  const images = Array.isArray(watch.images) ? watch.images : [];
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-slide effect
   useEffect(() => {
     if (images.length > 1) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % images.length);
-      }, 3000); // 3s per image
+      }, 3000);
       return () => clearInterval(interval);
     }
-  }, [images.length]);
+  }, [images]);
 
-  const rating = Math.floor(Math.random() * 1 + 4);
-  const fullStars = rating;
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("en-IN").format(price);
+  const rating = Math.floor(Math.random() * 2 + 4); // 4-5 stars
+  const formatPrice = (price) => new Intl.NumberFormat("en-IN").format(price);
 
   return (
-    <a
+    <Link
       href={`/watches/product/${watch.id}`}
       className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col cursor-pointer"
     >
-      {/* Image Slideshow */}
       <div className="relative overflow-hidden h-64 rounded-t-xl">
         {images.map((img, index) => (
-          <img
+          <Image
             key={index}
-            src={img}
+            src={img || "/placeholder.jpg"}
             alt={watch.name}
+            fill
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               index === currentIndex ? "opacity-100" : "opacity-0"
             }`}
@@ -54,7 +52,6 @@ function SingleWatch({ watch }) {
         ))}
       </div>
 
-      {/* Info */}
       <div className="p-4 flex flex-col gap-1">
         <p className="text-xs font-medium text-gray-500 uppercase">
           {watch.brand}
@@ -63,20 +60,18 @@ function SingleWatch({ watch }) {
           {watch.name}
         </h3>
 
-        {/* Rating */}
         <div className="flex items-center gap-1 mt-1">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
               className={`w-4 h-4 ${
-                i < fullStars ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
               }`}
             />
           ))}
           <span className="text-xs text-gray-600 ml-1">{rating.toFixed(1)}</span>
         </div>
 
-        {/* Price & Add Button */}
         <div className="flex items-center justify-between mt-2">
           <span className="font-bold text-lg flex items-center">
             <RupeeSign className="w-4 h-4 mr-0.5" />
@@ -93,54 +88,24 @@ function SingleWatch({ watch }) {
           </button>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
-export default function ProductGrid() {
-  const [watches, setWatches] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function RandomProductGrid({ watches = [] }) {
+  if (!watches || watches.length === 0) return null;
 
-  useEffect(() => {
-    fetch("/api/watches")
-      .then((res) => res.json())
-      .then((data) => {
-        const items = data.data || [];
-        const shuffled = items.sort(() => 0.5 - Math.random());
-        setWatches(shuffled.slice(0, 4)); // Only 4 watches
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-gray-500 text-lg">Loading watches...</p>
-      </div>
-    );
-  }
+  // Pick 4 random watches
+  const shuffled = [...watches].sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, 4);
 
   return (
-    <section className="py-12 px-4 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Featured Watches
-          </h2>
-          <a
-            href="/all-products"
-            className="text-sm font-semibold text-black hover:text-gray-700 flex items-center gap-1"
-          >
-            View All <ArrowRight size={16} />
-          </a>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {watches.map((watch) => (
-            <SingleWatch key={watch.id} watch={watch} />
-          ))}
-        </div>
+    <div className="py-12 px-4 bg-gray-50">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {selected.map((watch) => (
+          <SingleWatch key={watch.id} watch={watch} />
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

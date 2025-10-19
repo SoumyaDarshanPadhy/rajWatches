@@ -5,7 +5,7 @@ function WhyChooseUs() {
   const features = [
     {
       icon: <Shield className="h-8 w-8" />,
-      title: "Lifetime Warranty",
+      title: "Assured Warranty",
       description:
         "Comprehensive warranty coverage on all our premium timepieces with free servicing",
     },
@@ -31,7 +31,7 @@ function WhyChooseUs() {
       icon: <Clock className="h-8 w-8" />,
       title: "Expert Craftsmanship",
       description:
-        "Over 25 years of expertise in creating exceptional timepieces",
+        "Over 56 years of expertise in creating exceptional timepieces",
     },
     {
       icon: <Star className="h-8 w-8" />,
@@ -87,7 +87,7 @@ function WhyChooseUs() {
               <div className="text-sm text-gray-300">Happy Customers</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-400">25+</div>
+              <div className="text-3xl font-bold text-yellow-400">56+</div>
               <div className="text-sm text-gray-300">Years of Excellence</div>
             </div>
             <div className="text-center">

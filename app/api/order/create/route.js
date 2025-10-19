@@ -57,7 +57,7 @@ export async function POST(req) {
         );
       }
 
-      const itemPrice = watch.price;
+      const itemPrice = watch.discountedPrice;
 
       // Check price validity
       if (isNaN(itemPrice) || itemPrice <= 0) {

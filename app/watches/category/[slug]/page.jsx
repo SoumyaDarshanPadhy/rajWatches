@@ -1,12 +1,24 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams, useParams } from "next/navigation";
-import { ArrowRight, ShoppingBag } from "lucide-react";
+import { useParams } from "next/navigation";
+import { ArrowRight, ShoppingBag, Filter } from "lucide-react";
 
-// ---------------- Price Display Component ----------------
+const BRANDS = [
+  "Fastrack",
+  "Titan",
+  "SF",
+  "Tommy Hilfiger",
+  "Police",
+  "Kenneth Cole",
+  "Sonata",
+  "Poze",
+  "Ajanta",
+  "Raga",
+  "Vyb",
+];
+
 const PriceDisplay = ({ price, discountedPrice }) => {
   const formatPrice = (value) =>
     new Intl.NumberFormat("en-IN", {
@@ -16,40 +28,43 @@ const PriceDisplay = ({ price, discountedPrice }) => {
     }).format(value);
 
   const finalPrice = discountedPrice || price;
-
   return (
     <div className="mt-2 flex items-baseline gap-2">
-      <span className="text-xl font-extrabold text-gray-900">{formatPrice(finalPrice)}</span>
+      <span className="text-xl font-extrabold text-gray-900">
+        {formatPrice(finalPrice)}
+      </span>
       {discountedPrice && (
-        <span className="text-gray-400 line-through text-sm font-medium">{formatPrice(price)}</span>
+        <span className="text-gray-400 line-through text-sm font-medium">
+          {formatPrice(price)}
+        </span>
       )}
     </div>
   );
 };
 
-// ---------------- Main Component ----------------
 export default function CategoryPage() {
-  const params = useParams(); // ✅ get dynamic params
-  const searchParams = useSearchParams(); // ✅ for ?brand=
+  const params = useParams();
   const [slug, setSlug] = useState("");
-  const [brand, setBrand] = useState(null);
-
-  // --------- States ----------
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [priceInput, setPriceInput] = useState("");
+  const [sortInput, setSortInput] = useState("");
+  const [filters, setFilters] = useState({
+    brands: [],
+    price: "",
+    sort: "",
+  });
   const [watches, setWatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
   const [totalPages, setTotalPages] = useState(1);
-  const [priceFilterInput, setPriceFilterInput] = useState("");
-  const [priceFilter, setPriceFilter] = useState("");
 
-  // Unwrap params and searchParams
+  // Set category slug
   useEffect(() => {
     setSlug(params.slug || "");
-    setBrand(searchParams.get("brand") || null);
-  }, [params, searchParams]);
+  }, [params]);
 
-  // --------- Fetch Watches ----------
+  // Fetch Data
   const fetchWatches = async () => {
     if (!slug) return;
     setLoading(true);
@@ -57,143 +72,187 @@ export default function CategoryPage() {
     const paramsObj = new URLSearchParams();
     paramsObj.append("page", page);
     paramsObj.append("limit", limit);
-    if (brand) paramsObj.append("brand", brand);
-    if (priceFilter) paramsObj.append("price", priceFilter);
+
+    if (filters.price) paramsObj.append("price", filters.price);
+    if (filters.brands.length > 0)
+      paramsObj.append("brands", filters.brands.join(","));
+    if (filters.sort) paramsObj.append("sort", filters.sort);
 
     const categoryMap = {
       men: "Guys Watch",
       women: "Girls Watch",
-      wallclocks: "Wall Watch",
+      wallclocks: "Wall clock",
+      unisex: "unisex watch",
+      couple: "couple watch",
       all: "all",
     };
-
     const dbCategory = categoryMap[slug.toLowerCase()] || "all";
     if (dbCategory !== "all") paramsObj.append("category", dbCategory);
 
     try {
       const res = await fetch(`/api/watches?${paramsObj.toString()}`);
       const data = await res.json();
-      setWatches(data.data);
-      setTotalPages(data.totalPages || 1);
-    } catch (error) {
-      console.error("Failed to fetch watches:", error);
+      if (data?.status === "success") {
+        setWatches(data.data);
+        setTotalPages(data.totalPages || 1);
+      } else {
+        setWatches([]);
+        setTotalPages(1);
+      }
+    } catch (err) {
+      console.error("Error fetching watches:", err);
       setWatches([]);
-      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch only when filters or page changes
   useEffect(() => {
     fetchWatches();
-  }, [slug, brand, page, priceFilter]);
+  }, [slug, page, filters]);
 
-  const handleFilterClick = () => {
-    setPage(1);
-    setPriceFilter(priceFilterInput);
+  // Toggle brand selection
+  const toggleBrand = (brand) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brand)
+        ? prev.filter((b) => b !== brand)
+        : [...prev, brand]
+    );
   };
 
-  // --------- Invalid category ----------
-  if (!slug) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center p-10 text-xl text-gray-500 font-medium bg-white w-full">
-        Invalid category
-      </div>
-    );
-  }
+  // Apply filters manually
+  const handleShowResults = () => {
+    setPage(1);
+    setFilters({
+      brands: selectedBrands,
+      price: priceInput,
+      sort: sortInput,
+    });
+  };
 
-  // --------- No Products ----------
-  if (!loading && watches.length === 0) {
-    return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center p-10 bg-white text-gray-800">
-        <ShoppingBag className="w-16 h-16 text-gray-300 mb-6" />
-        <h2 className="text-2xl font-semibold mb-2">No Products Available</h2>
-        <p className="mb-6 text-gray-600 text-center max-w-md">
-          We couldn't find any watches for the criteria:{" "}
-          <span className="font-semibold text-gray-800">{slug}</span>
-          {brand && <span className="font-semibold text-gray-800"> in the "{brand}" brand.</span>}
-        </p>
-        <Link
-          href="/watches/category/all"
-          className="flex items-center text-indigo-600 font-medium hover:text-indigo-800 transition duration-300 border border-indigo-500 hover:border-indigo-800 px-4 py-2 rounded-full"
-        >
-          Browse All Watches <ArrowRight className="w-4 h-4 ml-2" />
-        </Link>
-      </div>
-    );
-  }
+  // Reset filters
+  const handleReset = () => {
+    setSelectedBrands([]);
+    setPriceInput("");
+    setSortInput("");
+    setFilters({ brands: [], price: "", sort: "" });
+    setPage(1);
+  };
 
   return (
     <section className="bg-gray-50 min-h-screen w-full py-16">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Header / Title */}
-        <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-              {brand ? <span className="text-indigo-600">{brand}'s</span> : <span className="text-indigo-600">Shop</span>}{" "}
-              {slug.charAt(0).toUpperCase() + slug.slice(1)} Watches
-            </h1>
-            <p className="mt-2 text-xl text-gray-500">Showing {watches.length} items.</p>
+        {/* FILTERS */}
+        <div className="mb-8 bg-white p-5 rounded-lg shadow-md space-y-6">
+          <div className="flex items-center gap-2 text-gray-800 font-semibold text-lg">
+            <Filter className="w-5 h-5" /> Filters
           </div>
 
-          {/* Price Filter */}
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              placeholder="Max Price"
-              value={priceFilterInput}
-              onChange={(e) => setPriceFilterInput(e.target.value)}
-              className="border px-3 py-1 rounded-md w-32 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+          {/* Brand Filter */}
+          <div>
+            <h3 className="font-semibold mb-2 text-gray-700">Brands</h3>
+            <div className="flex flex-wrap gap-2">
+              {BRANDS.map((brand) => (
+                <button
+                  key={brand}
+                  onClick={() => toggleBrand(brand)}
+                  className={`px-3 py-1 rounded-full border text-sm transition ${
+                    selectedBrands.includes(brand)
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                  }`}
+                >
+                  {brand}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Price + Sort Filter Row */}
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Price Filter */}
+            <div>
+              <h3 className="font-semibold mb-2 text-gray-700">Max Price</h3>
+              <input
+                type="number"
+                placeholder="e.g. 5000"
+                value={priceInput}
+                onChange={(e) => setPriceInput(e.target.value)}
+                className="border px-3 py-1 rounded-md w-32 text-gray-700 focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            {/* Sort Filter */}
+            <div>
+              <h3 className="font-semibold mb-2 text-gray-700">Sort By</h3>
+              <select
+                value={sortInput}
+                onChange={(e) => setSortInput(e.target.value)}
+                className="border px-3 py-1 rounded-md w-48 text-gray-700 focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Newest</option>
+                <option value="asc">Price: Low to High</option>
+                <option value="desc">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 pt-2">
             <button
-              onClick={handleFilterClick}
-              className="bg-indigo-600 text-white px-4 py-1 rounded-md hover:bg-indigo-700 transition"
+              onClick={handleShowResults}
+              className="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 transition"
             >
-              Filter
+              Show Results
+            </button>
+            <button
+              onClick={handleReset}
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md font-medium hover:bg-gray-300 transition"
+            >
+              Reset
             </button>
           </div>
         </div>
 
-        {/* Grid */}
+        {/* PRODUCTS */}
         {loading ? (
           <div className="text-center py-16 text-gray-500">Loading watches...</div>
+        ) : watches.length === 0 ? (
+          <div className="text-center py-16 text-gray-500">
+            No products found for selected filters.
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {watches.map((watch) => {
-                const imagesArray = Array.isArray(watch.images)
-                  ? watch.images
-                  : typeof watch.images === "string"
-                  ? watch.images.split(",")
-                  : [];
-
-                return (
-                  <Link
-                    key={watch.id}
-                    href={`/watches/product/${watch.id}`}
-                    className="group block rounded-xl p-4 bg-white transition duration-300 transform hover:shadow-2xl hover:scale-[1.03] overflow-hidden"
-                  >
-                    <div className="relative w-full aspect-[4/5] h-56 mb-4 overflow-hidden rounded-lg shadow-md bg-gray-100">
-                      <Image
-                        src={imagesArray[0] || "/placeholder.jpg"}
-                        alt={watch.name}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                        priority={true}
-                      />
-                    </div>
-
-                    <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
-                      {watch.brand}
-                    </p>
-                    <h2 className="text-base md:text-lg font-bold text-gray-800 truncate transition mt-1">
-                      {watch.name}
-                    </h2>
-                    <PriceDisplay price={watch.price} discountedPrice={watch.discountedPrice} />
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {watches.map((watch) => (
+                <Link
+                  key={watch.id}
+                  href={`/watches/product/${watch.id}`}
+                  className="group block bg-white p-4 rounded-xl shadow hover:shadow-xl transition"
+                >
+                  <div className="relative w-full aspect-[4/5] mb-4 overflow-hidden rounded-lg bg-gray-100">
+                    <Image
+                      src={
+                        Array.isArray(watch.images)
+                          ? watch.images[0]
+                          : watch.images?.split(",")[0]
+                      }
+                      alt={watch.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 uppercase">{watch.brand}</p>
+                  <h2 className="text-base font-bold text-gray-800 truncate">
+                    {watch.name}
+                  </h2>
+                  <PriceDisplay
+                    price={watch.price}
+                    discountedPrice={watch.discountedPrice}
+                  />
+                </Link>
+              ))}
             </div>
 
             {/* Pagination */}

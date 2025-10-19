@@ -13,8 +13,8 @@ function Navbar() {
     { name: 'Men', href: '/watches/category/men' },
     { name: 'Women', href: '/watches/category/women' },
     { name: 'Wall Clocks', href: '/watches/category/wallclocks' },
-    { name: 'New Arrivals', href: '/watches/category/all' },
-    { name: 'Sale', href: '/watches/category/all' },
+    { name: 'Unisex', href: '/watches/category/unisex' },
+    { name: 'Couple', href: '/watches/category/couple' },
   ];
 
   const handleSearch = (e) => {

@@ -51,7 +51,7 @@ const Footer = () => {
             <li className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-gray-400" />
               <a href="mailto:info@rajwatches.in" className="hover:text-white text-gray-400">
-                ndxrajandraj@gmail.com
+                Praveen.chhatwani@gmail.com
               </a>
             </li>
             <li className="flex items-center gap-2">

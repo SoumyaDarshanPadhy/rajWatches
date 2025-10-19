@@ -12,36 +12,44 @@ export async function GET(request) {
 
     // Filters
     const maxPrice = searchParams.get("price");
-    const category = searchParams.get("category"); // category filter
+    const category = searchParams.get("category");
     const brandsString = searchParams.get("brands");
+    const sort = searchParams.get("sort"); // ✅ new: sort param
     const brands = brandsString ? brandsString.split(",") : [];
 
-    // Build where clause
     const whereClause = {};
 
-    // Category filter applied only if provided and not "all"
+    // ✅ Category filter
     if (category && category.toLowerCase() !== "all") {
       whereClause.category = { equals: category, mode: "insensitive" };
     }
 
-    // Price filter applied only if provided
+    // ✅ Price filter
     if (maxPrice && !isNaN(parseFloat(maxPrice))) {
       whereClause.price = { lte: parseFloat(maxPrice) };
     }
 
-    // Brand filter applied only if provided
+    // ✅ Brand filter (case-insensitive)
     if (brands.length > 0) {
-      whereClause.brand = { in: brands };
+      whereClause.brand = {
+        in: brands.map((b) => b.toLowerCase()),
+        mode: "insensitive",
+      };
     }
 
-    // Total count for pagination (always consider category)
+    // ✅ Sorting logic
+    let orderBy = { createdAt: "desc" };
+    if (sort === "asc") orderBy = { price: "asc" };
+    if (sort === "desc") orderBy = { price: "desc" };
+
+    // ✅ Count total
     const totalWatches = await prisma.watch.count({ where: whereClause });
     const totalPages = Math.ceil(totalWatches / limit) || 1;
 
-    // Fetch paginated watches
+    // ✅ Fetch paginated watches
     const watches = await prisma.watch.findMany({
       where: whereClause,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       skip,
       take: limit,
       select: {
@@ -81,3 +89,4 @@ export async function GET(request) {
     );
   }
 }
+  

@@ -7,19 +7,19 @@ import StorySection from "../components/StorySection";
 import Contact from "@/components/Contact";
 import HeroSlideshow from "@/components/HeroSlideshow";
 
-const KennethColelogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/kenneth-cole-logo.png";
-const Tommylogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/Tommy_Hilfiger_Logo.png";
-const Ajantalogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/ajanta-logo.jpg";
-const Sonatalogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/sonata_logo.jpg";
-const Titanlogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/titan.png";
-const Fastracklogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/Fastrack_logo.svg.png";
-const Casiologo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/casio_logo.webp";
-const Policelogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/police_logo.png";
-const Sflogo = "https://ik.imagekit.io/rajstorage1/store_frontend/Logos/sf_logo.png";
+const KennethColelogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/kenneth-cole-logo.png";
+const Tommylogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/Tommy_Hilfiger_Logo.png";
+const Ajantalogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/ajanta-logo.jpg";
+const Sonatalogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/sonata_logo.jpg";
+const Titanlogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/titan.png";
+const Fastracklogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/Fastrack_logo.svg.png";
+const Casiologo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/casio_logo.webp";
+const Policelogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/police_logo.png";
+const Sflogo = "https://ik.imagekit.io/rajstorage2/store_frontend/Logos/sf_logo.png";
 
-const Menswatch = "https://ik.imagekit.io/rajstorage1/RAJ_WATCHES_Brand_1/3Fastrack/images/112-3184_QM02/1_112-3184_QM02.jpg";
-const Womenswatch = "https://ik.imagekit.io/5qrepdiow/frontend/Womenswatchcollection.webp?updatedAt=1760790199449";
-const wallclock = "https://ik.imagekit.io/5qrepdiow/frontend/wallcolock.avif?updatedAt=17607911075554";
+const Menswatch = "https://ik.imagekit.io/rajstorage2/RAJ_WATCHES_Brand_2/4Kenneth%20Cole%20%20Fossil%20Tommy%20Police/images/32-NTTH_1792112/2_32-NTTH_1792112.jpg";
+const Womenswatch = "https://ik.imagekit.io/rajstorage2/RAJ_WATCHES_Brand_2/5Poze/images/125-70039_KM05/3_125-70039_KM05.jpg";
+const wallclock = "https://ik.imagekit.io/rajstorage2/RAJ_WATCHES_Brand_2/7Ajanta_images/15-2377/1_15-2377.jpg";
 
 export default async function HomePage() {
   const brands = [

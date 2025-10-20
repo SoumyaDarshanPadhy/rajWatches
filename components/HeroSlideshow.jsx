@@ -7,11 +7,11 @@ import { ChevronRight } from 'lucide-react';
 // 1. Define the image array with ImageKit transformations for browser compatibility.
 // .HEIC files are not universally supported, so we request ImageKit to convert them to WebP (tr=f-webp).
 const IMAGE_ARRAY = [
-  { src: "https://ik.imagekit.io/rajstorage1/store_frontend/6.HEIC?tr=f-webp", alt: "Luxury Watch Image 1" },
-  { src: "https://ik.imagekit.io/rajstorage1/store_frontend/1.HEIC?tr=f-webp", alt: "Luxury Watch Image 2" },
-  { src: "https://ik.imagekit.io/rajstorage1/store_frontend/4.HEIC?tr=f-webp", alt: "Luxury Watch Image 3" },
-  { src: "https://ik.imagekit.io/rajstorage1/store_frontend/5.HEIC?tr=f-webp", alt: "Luxury Watch Image 4" },
-  { src: "https://ik.imagekit.io/rajstorage1/store_frontend/7.HEIC?tr=f-webp", alt: "Luxury Watch Image 5" }
+  { src: "https://ik.imagekit.io/rajstorage2/store_frontend/6.HEIC?tr=f-webp", alt: "Luxury Watch Image 1" },
+  { src: "https://ik.imagekit.io/rajstorage2/store_frontend/1.HEIC?tr=f-webp", alt: "Luxury Watch Image 2" },
+  { src: "https://ik.imagekit.io/rajstorage2/store_frontend/4.HEIC?tr=f-webp", alt: "Luxury Watch Image 3" },
+  { src: "https://ik.imagekit.io/rajstorage2/store_frontend/5.HEIC?tr=f-webp", alt: "Luxury Watch Image 4" },
+  { src: "https://ik.imagekit.io/rajstorage2/store_frontend/7.HEIC?tr=f-webp", alt: "Luxury Watch Image 5" }
 ];
 
 /**
